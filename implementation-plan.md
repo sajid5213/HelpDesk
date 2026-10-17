@@ -41,17 +41,17 @@ See `project-scope.md` for what we're building and `tech-stack.md` for how.
 
 ## Phase 4: Tickets
 
-- [ ] Create the tickets, messages, and notes tables (statuses: Open, Resolved, Closed; categories: General question, Technical question, Refund request)
-- [ ] Build the simulated inbound email endpoint that creates tickets or adds to an existing thread
-- [ ] Build the ticket access policy (admins see all; agents see unassigned tickets and their own; another agent's ticket → 403)
-- [ ] Build an endpoint for agents to claim an unassigned ticket (only one agent can win)
-- [ ] Build an endpoint to list tickets with filtering, sorting, search, and paging
-- [ ] Build an endpoint to fetch a single ticket with its thread and notes
-- [ ] Build endpoints to reply, add notes, change status, and correct the category
-- [ ] Build admin-only CRUD endpoints for knowledge base articles
-- [ ] Build an admin-only dashboard stats endpoint (counts by status and category, AI vs. agent resolved)
-- [ ] Auto-close resolved tickets after 7 days with a db-scheduler job
-- [ ] Add Swagger UI (springdoc) with bearer auth and a Bruno collection for auth and ticket endpoints
+- [x] Create the tickets, messages, and notes tables (statuses: Open, Resolved, Closed; categories: General question, Technical question, Refund request)
+- [x] Build the simulated inbound email endpoint that creates tickets or adds to an existing thread
+- [x] Build the ticket access policy (admins see all; agents see unassigned tickets and their own; another agent's ticket → 403)
+- [x] Build an endpoint for agents to claim an unassigned ticket (only one agent can win)
+- [x] Build an endpoint to list tickets with filtering, sorting, search, and paging
+- [x] Build an endpoint to fetch a single ticket with its thread and notes
+- [x] Build endpoints to reply, add notes, change status, and correct the category
+- [x] Build CRUD endpoints for knowledge base articles (agents read, admins write)
+- [x] Build an admin-only dashboard stats endpoint (counts by status and category, AI vs. agent resolved)
+- [x] Auto-close resolved tickets after 7 days with a db-scheduler job
+- [x] Add Swagger UI (springdoc) with bearer auth and a Postman collection for auth and ticket endpoints
 
 ## Phase 5: AI Features
 

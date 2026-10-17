@@ -31,6 +31,8 @@ class SecurityConfig {
 				.requestMatchers("/auth/token", "/auth/refresh", "/auth/logout").permitAll()
 				.requestMatchers("/.well-known/jwks.json").permitAll()
 				.requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+				// API docs. Public for local development; Phase 7 decides whether production exposes them.
+				.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
 				.requestMatchers("/error").permitAll()
 				.anyRequest().authenticated())
 			.oauth2ResourceServer((resourceServer) -> resourceServer

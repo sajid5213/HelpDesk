@@ -30,7 +30,7 @@
 | Job queue / background work | **db-scheduler**: tasks stored in PostgreSQL, so jobs survive restarts and never run twice (AI processing, signing-key rotation) |
 | AI | Anthropic Java SDK (`com.anthropic`). **Claude Haiku 5.5** (`claude-haiku-5-5`) for classification and summaries; **Claude Sonnet 5.5** (`claude-sonnet-5-5`) for writing replies *(our call on which model does which)* |
 | Rate limiting | Bucket4j (in-memory) |
-| API docs / manual testing | springdoc-openapi + Swagger UI (bearer auth); Bruno or Postman collection for auth + ticket endpoints |
+| API docs / manual testing | springdoc-openapi + Swagger UI (bearer auth); Postman collection + environment in `postman/` (runnable with Newman) |
 
 **AI usage:**
 - Classification and other machine-read results use structured JSON output with a fixed schema.

@@ -1,7 +1,6 @@
 package com.helpdesk.user;
 
 import java.time.Instant;
-import java.util.Locale;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -10,6 +9,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import com.helpdesk.common.Emails;
 
 @Entity
 @Table(name = "users")
@@ -53,7 +54,7 @@ public class User {
 
 	/** Emails are compared case-insensitively by storing them trimmed and lowercased. */
 	public static String normalizeEmail(String email) {
-		return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+		return Emails.normalize(email);
 	}
 
 	public UUID getId() {

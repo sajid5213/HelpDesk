@@ -6,7 +6,7 @@ import java.util.Base64;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("helpdesk")
-public record HelpdeskProperties(Auth auth, Admin admin) {
+public record HelpdeskProperties(Auth auth, Admin admin, Tickets tickets) {
 
 	public record Auth(String issuer, String audience, Duration accessTokenTtl, Duration refreshTokenTtl,
 			Duration keyRotationInterval, Duration keyRetireBuffer, String keyEncryptionKey, Lockout lockout,
@@ -43,6 +43,10 @@ public record HelpdeskProperties(Auth auth, Admin admin) {
 	}
 
 	public record RateLimit(int perIpPerMinute, int perAccountPerMinute) {
+	}
+
+	/** {@code autoCloseAfter}: a RESOLVED ticket with no student reply for this long is CLOSED. */
+	public record Tickets(Duration autoCloseAfter) {
 	}
 
 	public record Admin(String email, String password) {

@@ -57,3 +57,5 @@ helpdesk:
   admin:
     email: ${ADMIN_EMAIL:}
     password: ${ADMIN_PASSWORD:}
+  tickets:
+    auto-close-after: P7D
