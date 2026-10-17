@@ -17,6 +17,12 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+        # Pages serialize as {content, page: {size, number, totalElements, totalPages}}.
+        serialization-mode: via-dto
 
 server:
   # 8090 locally because 8080 is often taken; Docker/OCI can set PORT=8080.

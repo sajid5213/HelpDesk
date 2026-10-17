@@ -27,6 +27,9 @@ public class AuthEvent {
 	@Column(name = "user_id")
 	private UUID userId;
 
+	@Column(name = "actor_id")
+	private UUID actorId;
+
 	private String ip;
 
 	@Column(name = "created_at", nullable = false)
@@ -35,9 +38,10 @@ public class AuthEvent {
 	protected AuthEvent() {
 	}
 
-	AuthEvent(AuthEventType type, UUID userId, String ip, Instant createdAt) {
+	AuthEvent(AuthEventType type, UUID userId, UUID actorId, String ip, Instant createdAt) {
 		this.type = type;
 		this.userId = userId;
+		this.actorId = actorId;
 		this.ip = ip;
 		this.createdAt = createdAt;
 	}
@@ -52,6 +56,10 @@ public class AuthEvent {
 
 	public UUID getUserId() {
 		return userId;
+	}
+
+	public UUID getActorId() {
+		return actorId;
 	}
 
 	public String getIp() {

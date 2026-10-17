@@ -64,12 +64,24 @@ public class User {
 		return email;
 	}
 
+	public void setEmail(String email) {
+		this.email = normalizeEmail(email);
+	}
+
 	public String getPasswordHash() {
 		return passwordHash;
 	}
 
+	public void setPasswordHash(String passwordHash) {
+		this.passwordHash = passwordHash;
+	}
+
 	public Role getRole() {
 		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
 	}
 
 	public boolean isActive() {
@@ -98,6 +110,11 @@ public class User {
 
 	public boolean isLockedAt(Instant now) {
 		return lockedUntil != null && lockedUntil.isAfter(now);
+	}
+
+	public void clearLockout() {
+		this.failedLoginCount = 0;
+		this.lockedUntil = null;
 	}
 
 	public Instant getCreatedAt() {

@@ -25,7 +25,16 @@ public class AuditService {
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void record(AuthEventType type, UUID userIdOrNull, String ipOrNull) {
-		events.save(new AuthEvent(type, userIdOrNull, ipOrNull, clock.instant()));
+		record(type, userIdOrNull, null, ipOrNull);
+	}
+
+	/**
+	 * Records an action an admin ({@code actorId}) took on an account ({@code userId}). Joins the
+	 * caller's transaction, so the change and its audit row commit or roll back together.
+	 */
+	@Transactional
+	public void record(AuthEventType type, UUID userIdOrNull, UUID actorIdOrNull, String ipOrNull) {
+		events.save(new AuthEvent(type, userIdOrNull, actorIdOrNull, ipOrNull, clock.instant()));
 	}
 
 }

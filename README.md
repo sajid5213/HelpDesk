@@ -63,3 +63,23 @@ curl -s -H 'Content-Type: application/json' -d '{"refreshToken":"<refreshToken>"
 ```
 
 Browsers send `X-Auth-Client: browser` and get the refresh token as an `HttpOnly; Secure; SameSite=Strict` cookie instead of in the body.
+
+## Manage users (admin only)
+
+```bash
+TOKEN=<admin accessToken>
+
+# Create an agent (role defaults to AGENT; passwords need 12+ characters)
+curl -s -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json'   -d '{"email":"agent@helpdesk.local","password":"agent-password-123"}' localhost:8090/api/users
+
+# List (newest first, max 100 per page) and get one
+curl -s -H "Authorization: Bearer $TOKEN" 'localhost:8090/api/users?page=0&size=20'
+curl -s -H "Authorization: Bearer $TOKEN" localhost:8090/api/users/<id>
+
+# Change any of email, password, role, active
+curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json'   -d '{"active":false}' localhost:8090/api/users/<id>
+```
+
+- Users are deactivated, never deleted, so the audit trail stays complete.
+- Deactivating a user or changing their password or role revokes their refresh tokens. An access token already issued keeps working until it expires (at most 15 minutes): the usual trade-off of stateless JWTs.
+- Admins cannot deactivate themselves or change their own role, so there is always at least one active admin.

@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-@Import({ TestcontainersConfiguration.class, IntegrationTest.TestClockConfig.class })
+@Import({ TestcontainersConfiguration.class, IntegrationTest.TestClockConfig.class, TestUsers.class })
 public abstract class IntegrationTest {
 
 	@Autowired
@@ -29,6 +29,9 @@ public abstract class IntegrationTest {
 
 	@Autowired
 	protected MutableClock clock;
+
+	@Autowired
+	protected TestUsers testUsers;
 
 	@Autowired
 	private LoginRateLimiter rateLimiter;

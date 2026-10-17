@@ -33,11 +33,11 @@ See `project-scope.md` for what we're building and `tech-stack.md` for how.
 
 ## Phase 3: User Management
 
-- [ ] Add role-based access control for ADMIN and AGENT with `@PreAuthorize`
-- [ ] Build an admin-only endpoint to create agents
-- [ ] Build an admin-only endpoint to list users
-- [ ] Build an admin-only endpoint to edit users
-- [ ] Build an admin-only endpoint to deactivate users (and revoke their refresh tokens)
+- [x] Add role-based access control for ADMIN and AGENT with `@PreAuthorize`
+- [x] Build an admin-only endpoint to create agents
+- [x] Build an admin-only endpoint to list users
+- [x] Build an admin-only endpoint to edit users
+- [x] Build an admin-only endpoint to deactivate users (and revoke their refresh tokens)
 
 ## Phase 4: Tickets
 

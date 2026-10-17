@@ -17,7 +17,9 @@ import com.helpdesk.audit.AuthEventType;
 import com.helpdesk.config.HelpdeskProperties;
 import com.helpdesk.user.User;
 import com.helpdesk.user.UserRepository;
+import com.helpdesk.user.UserSessionsInvalidated;
 
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,6 +107,13 @@ public class RefreshTokenService {
 	@Transactional
 	public void revokeAllFor(UUID userId) {
 		tokens.revokeAllForUser(userId, clock.instant());
+	}
+
+	/** Deactivation, password change, or role change: the user must log in again. */
+	@EventListener
+	@Transactional
+	public void onUserSessionsInvalidated(UserSessionsInvalidated event) {
+		revokeAllFor(event.userId());
 	}
 
 	/** Finds the user a token belongs to, without changing anything. Used for audit on logout. */
