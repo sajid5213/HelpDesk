@@ -1,0 +1,19 @@
+# Java / Maven
+target/
+*.class
+*.log
+
+# Node / Vite
+node_modules/
+dist/
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+
+# IDE
+.idea/
+*.iml
+.DS_Store

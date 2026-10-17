@@ -1,0 +1,13 @@
+{
+  "terminal.integrated.env.windows": {
+    "JAVA_HOME": "C:\\Program Files\\Eclipse Adoptium\\jdk-25.0.4.101-hotspot",
+    "PATH": "C:\\Program Files\\Eclipse Adoptium\\jdk-25.0.4.101-hotspot\\bin;${env:PATH}"
+  },
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-25",
+      "path": "C:\\Program Files\\Eclipse Adoptium\\jdk-25.0.4.101-hotspot",
+      "default": true
+    }
+  ]
+}
