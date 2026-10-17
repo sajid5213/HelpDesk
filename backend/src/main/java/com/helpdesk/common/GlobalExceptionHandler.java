@@ -1,7 +1,9 @@
 package com.helpdesk.common;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -18,6 +20,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
 		problem.setTitle("Not Found");
 		return problem;
+	}
+
+	@ExceptionHandler(ApiException.class)
+	ResponseEntity<ProblemDetail> handleApi(ApiException ex) {
+		ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
+		problem.setProperty("error", ex.getErrorCode());
+		HttpHeaders headers = new HttpHeaders();
+		ex.getHeaders().forEach(headers::add);
+		return ResponseEntity.status(ex.getStatus()).headers(headers).body(problem);
 	}
 
 }

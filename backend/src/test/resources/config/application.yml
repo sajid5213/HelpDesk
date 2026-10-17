@@ -1,0 +1,7 @@
+# Test-only values, layered over src/main/resources/application.yml. Not real secrets.
+helpdesk:
+  auth:
+    key-encryption-key: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+  admin:
+    email: admin@helpdesk.test
+    password: test-admin-password-123

@@ -14,22 +14,22 @@ See `project-scope.md` for what we're building and `tech-stack.md` for how.
 
 ## Phase 2: Authentication
 
-- [ ] Create the `users` table and seed the first admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (BCrypt)
-- [ ] Create the `signing_keys` table with private keys encrypted at rest
-- [ ] Generate an RSA signing key on first startup if none exists
-- [ ] Expose `GET /.well-known/jwks.json` with active and recently retired public keys
-- [ ] Issue RS256 access tokens (15 min) with `kid`, `sub`, `roles`, `jti`, `iat`, `exp`, `iss`, `aud`
-- [ ] Build `POST /auth/token` (email + password login)
-- [ ] Validate tokens with the Spring Security OAuth2 resource server (signature, `exp`, `iss`, `aud`)
-- [ ] Store refresh tokens hashed (SHA-256) in a `refresh_tokens` table
-- [ ] Build `POST /auth/refresh` with rotation on every use and reuse detection
-- [ ] Build `POST /auth/logout` to revoke the refresh token
-- [ ] Set the refresh token as an httpOnly, Secure, SameSite=Strict cookie for browser clients
-- [ ] Rotate signing keys on a schedule with db-scheduler (default every 7 days)
-- [ ] Rate-limit `POST /auth/token` per IP and per account (Bucket4j) and lock accounts after repeated failures
-- [ ] Record auth events in an `auth_events` audit table (never passwords or tokens)
-- [ ] Return 401 / 403 with a consistent JSON error body
-- [ ] Write the required auth tests (expired, tampered, wrong `aud`/`iss`, retired key, removed key, refresh reuse, logout, lockout)
+- [x] Create the `users` table and seed the first admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (BCrypt)
+- [x] Create the `signing_keys` table with private keys encrypted at rest
+- [x] Generate an RSA signing key on first startup if none exists
+- [x] Expose `GET /.well-known/jwks.json` with active and recently retired public keys
+- [x] Issue RS256 access tokens (15 min) with `kid`, `sub`, `roles`, `jti`, `iat`, `exp`, `iss`, `aud`
+- [x] Build `POST /auth/token` (email + password login)
+- [x] Validate tokens with the Spring Security OAuth2 resource server (signature, `exp`, `iss`, `aud`)
+- [x] Store refresh tokens hashed (SHA-256) in a `refresh_tokens` table
+- [x] Build `POST /auth/refresh` with rotation on every use and reuse detection
+- [x] Build `POST /auth/logout` to revoke the refresh token
+- [x] Set the refresh token as an httpOnly, Secure, SameSite=Strict cookie for browser clients
+- [x] Rotate signing keys on a schedule with db-scheduler (default every 7 days)
+- [x] Rate-limit `POST /auth/token` per IP and per account (Bucket4j) and lock accounts after repeated failures
+- [x] Record auth events in an `auth_events` audit table (never passwords or tokens)
+- [x] Return 401 / 403 with a consistent JSON error body
+- [x] Write the required auth tests (expired, tampered, wrong `aud`/`iss`, retired key, removed key, refresh reuse, logout, lockout)
 
 ## Phase 3: User Management
 

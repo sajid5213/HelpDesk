@@ -1,6 +1,9 @@
 spring:
   application:
     name: helpdesk
+  config:
+    # Local secrets (HELPDESK_KEK, ADMIN_EMAIL, ADMIN_PASSWORD) live in backend/.env, which is gitignored.
+    import: optional:file:.env[.properties]
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/helpdesk}
     username: ${DB_USER:helpdesk}
@@ -24,3 +27,27 @@ management:
     web:
       exposure:
         include: health
+
+db-scheduler:
+  # Tables come from Flyway; scheduler runs with a single thread pool shared by all jobs.
+  threads: 4
+  polling-interval: 10s
+
+helpdesk:
+  auth:
+    issuer: https://helpdesk.local
+    audience: helpdesk-api
+    access-token-ttl: PT15M
+    refresh-token-ttl: P7D
+    key-rotation-interval: P7D
+    key-retire-buffer: PT5M
+    key-encryption-key: ${HELPDESK_KEK:}
+    lockout:
+      max-failures: 5
+      duration: PT15M
+    rate-limit:
+      per-ip-per-minute: 20
+      per-account-per-minute: 5
+  admin:
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
