@@ -22,7 +22,7 @@ class HelpdeskApplicationTests extends IntegrationTest {
 
 	@Test
 	void healthEndpointReportsUp() {
-		client.get()
+		management().get()
 			.uri("/actuator/health")
 			.exchange()
 			.expectStatus()

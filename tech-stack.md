@@ -96,9 +96,9 @@
 ## 7. Observability
 
 - **Metrics:** Micrometer (via Spring Boot Actuator), exposed at a Prometheus endpoint. Besides the built-in JVM/HTTP/database metrics, custom metrics for logins (success/failure), token refreshes, reuse detections, lockouts, tickets created, AI auto-resolved vs. sent to agents, AI call latency and errors, and job queue backlog *(our call on which custom metrics)*.
-- **Tracing:** OpenTelemetry, so one request can be followed from the API through the database, the job queue, and the Claude call.
-- **Prometheus** collects the metrics; **Grafana** shows them in dashboards. Both run as containers in Docker Compose, locally and on the OCI VM.
-- Metrics and traces never contain passwords, tokens, or email bodies. The Actuator and Prometheus endpoints are not publicly reachable *(our call)*.
+- **Tracing:** OpenTelemetry (Spring Boot's `spring-boot-starter-opentelemetry`, OTLP export), so one request can be followed from the API through the database, the job queue, and the Claude call. SQL spans come from `datasource-micrometer` (query text only, never parameter values). Traces are stored in **Grafana Tempo**, so metrics and traces share one Grafana.
+- **Prometheus** collects the metrics; **Grafana** shows them in dashboards; **Tempo** stores the traces. Both run as containers in Docker Compose, locally and on the OCI VM.
+- Metrics and traces never contain passwords, tokens, or email bodies. The Actuator and Prometheus endpoints live on a separate management port (8091) that is never published; only Prometheus reaches it over the private Docker network *(our call)*.
 
 ## 8. Email (stretch goal)
 

@@ -81,10 +81,10 @@ See `project-scope.md` for what we're building and `tech-stack.md` for how.
 
 ## Phase 8: Observability
 
-- [ ] Expose Micrometer metrics on a private Prometheus endpoint
-- [ ] Add custom metrics for logins, token refreshes, reuse detection, tickets, and AI outcomes
-- [ ] Add OpenTelemetry tracing across API, database, jobs, and Claude calls
-- [ ] Run Prometheus and Grafana with Docker Compose and add a dashboard
+- [x] Expose Micrometer metrics on a private Prometheus endpoint
+- [x] Add custom metrics for logins, token refreshes, reuse detection, tickets, and AI outcomes
+- [x] Add OpenTelemetry tracing across API, database, jobs, and Claude calls
+- [x] Run Prometheus and Grafana with Docker Compose and add a dashboard
 
 ## Phase 9 (Stretch): Email
 

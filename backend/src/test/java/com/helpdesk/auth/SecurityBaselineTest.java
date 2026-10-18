@@ -10,7 +10,7 @@ class SecurityBaselineTest extends IntegrationTest {
 
 	@Test
 	void healthIsPublic() {
-		client.get().uri("/actuator/health").exchange().expectStatus().isOk();
+		management().get().uri("/actuator/health").exchange().expectStatus().isOk();
 	}
 
 	@Test

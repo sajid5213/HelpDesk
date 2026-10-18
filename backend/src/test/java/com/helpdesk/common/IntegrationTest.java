@@ -6,10 +6,12 @@ import com.helpdesk.TestcontainersConfiguration;
 import com.helpdesk.auth.LoginRateLimiter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.micrometer.metrics.test.autoconfigure.AutoConfigureMetrics;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.web.server.LocalManagementPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -21,6 +23,8 @@ import org.springframework.test.web.servlet.client.RestTestClient;
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
+// Keep the Prometheus endpoint on, as in production (tests turn metric exporters off by default).
+@AutoConfigureMetrics
 @Import({ TestcontainersConfiguration.class, IntegrationTest.TestClockConfig.class, TestUsers.class })
 public abstract class IntegrationTest {
 
@@ -41,6 +45,14 @@ public abstract class IntegrationTest {
 
 	@Autowired
 	protected RecordingEmailSender sentEmails;
+
+	@LocalManagementPort
+	private int managementPort;
+
+	/** A client for the private management port (actuator: health, prometheus). */
+	protected RestTestClient management() {
+		return RestTestClient.bindToServer().baseUrl("http://localhost:" + managementPort).build();
+	}
 
 	@BeforeEach
 	void resetSharedState() {

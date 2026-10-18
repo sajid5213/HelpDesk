@@ -4,11 +4,17 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.helpdesk.common.HelpdeskMetrics;
+import com.helpdesk.common.HelpdeskMetrics.AiOutcome;
+import com.helpdesk.config.HelpdeskProperties;
 import com.helpdesk.email.OutboundEmail;
 import com.helpdesk.email.OutboundEmailRequested;
 import com.helpdesk.kb.KbArticle;
@@ -65,9 +71,18 @@ public class TicketAiPipeline {
 
 	private final Clock clock;
 
+	private final ObservationRegistry observations;
+
+	private final HelpdeskMetrics metrics;
+
+	private final String mode;
+
 	TicketAiPipeline(AiClient ai, TicketRepository tickets, TicketMessageRepository messages,
 			KbArticleRepository articles, ApplicationEventPublisher events, PlatformTransactionManager txManager,
-			Clock clock) {
+			Clock clock, ObservationRegistry observations, HelpdeskMetrics metrics, HelpdeskProperties properties) {
+		this.observations = observations;
+		this.metrics = metrics;
+		this.mode = properties.ai().mode();
 		this.ai = ai;
 		this.tickets = tickets;
 		this.messages = messages;
@@ -81,27 +96,73 @@ public class TicketAiPipeline {
 		this.clock = clock;
 	}
 
-	/** Runs the AI for one stored student message. Throws to let the scheduler retry. */
+	/**
+	 * Runs the AI for one stored student message. Throws to let the scheduler retry. Each attempt is
+	 * one trace: the database reads, both Claude calls and the writes nest under it.
+	 */
 	public Outcome process(Long ticketId, boolean newTicket) {
+		Outcome outcome = Observation.createNotStarted("helpdesk.ai.process", observations)
+			.contextualName("ai process ticket")
+			.observe(() -> run(ticketId, newTicket));
+		metrics.aiOutcome(switch (outcome) {
+			case AUTO_REPLIED -> AiOutcome.AUTO_RESOLVED;
+			case SUGGESTED -> AiOutcome.SUGGESTED;
+			case SKIPPED -> AiOutcome.SKIPPED;
+		});
+		return outcome;
+	}
+
+	private Outcome run(Long ticketId, boolean newTicket) {
 		Snapshot snapshot = readOnly.execute((status) -> load(ticketId));
 		if (snapshot == null) {
 			return Outcome.SKIPPED;
 		}
 
-		Classification classification = ai.classify(snapshot.thread());
-		ReplyDraft draft = ai.draftReply(snapshot.thread(), snapshot.knowledgeBase());
+		Classification classification = call("classify", () -> ai.classify(snapshot.thread()));
+		ReplyDraft draft = call("draft_reply", () -> ai.draftReply(snapshot.thread(), snapshot.knowledgeBase()));
 
 		return transactions.execute((status) -> apply(ticketId, newTicket, classification, draft, snapshot));
+	}
+
+	/**
+	 * One Claude call as a timer and a span, tagged with what it did and how it ended. Only fixed
+	 * values become tags; the ticket text never does.
+	 */
+	private <T> T call(String operation, Supplier<T> call) {
+		Observation observation = Observation.createNotStarted("helpdesk.ai.call", observations)
+			.contextualName("claude " + operation)
+			.lowCardinalityKeyValue("operation", operation)
+			.lowCardinalityKeyValue("mode", mode)
+			.start();
+		try (Observation.Scope scope = observation.openScope()) {
+			T result = call.get();
+			observation.lowCardinalityKeyValue("outcome", "success");
+			return result;
+		}
+		catch (AiRefusedException ex) {
+			observation.lowCardinalityKeyValue("outcome", "refused");
+			throw ex;
+		}
+		catch (RuntimeException ex) {
+			observation.lowCardinalityKeyValue("outcome", "error");
+			observation.error(ex);
+			throw ex;
+		}
+		finally {
+			observation.stop();
+		}
 	}
 
 	/** Marks a ticket the AI will not handle (turned off, or Claude declined). */
 	public void markSkipped(Long ticketId) {
 		separate.executeWithoutResult((status) -> tickets.markAiStatus(ticketId, AiStatus.SKIPPED, clock.instant()));
+		metrics.aiOutcome(AiOutcome.SKIPPED);
 	}
 
 	/** Marks a ticket whose AI job failed every retry. It stays with the agents. */
 	public void markFailed(Long ticketId) {
 		separate.executeWithoutResult((status) -> tickets.markAiStatus(ticketId, AiStatus.FAILED, clock.instant()));
+		metrics.aiOutcome(AiOutcome.FAILED);
 	}
 
 	private Snapshot load(Long ticketId) {

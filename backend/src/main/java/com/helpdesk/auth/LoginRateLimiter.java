@@ -12,6 +12,7 @@ import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.TimeMeter;
 
 import com.helpdesk.common.ApiException;
+import com.helpdesk.common.HelpdeskMetrics;
 import com.helpdesk.config.HelpdeskProperties;
 import com.helpdesk.user.User;
 
@@ -41,7 +42,10 @@ public class LoginRateLimiter {
 
 	private final TimeMeter time;
 
-	LoginRateLimiter(HelpdeskProperties properties, Clock clock) {
+	private final HelpdeskMetrics metrics;
+
+	LoginRateLimiter(HelpdeskProperties properties, Clock clock, HelpdeskMetrics metrics) {
+		this.metrics = metrics;
 		this.perIpPerMinute = properties.auth().rateLimit().perIpPerMinute();
 		this.perAccountPerMinute = properties.auth().rateLimit().perAccountPerMinute();
 		this.time = new ClockTimeMeter(clock);
@@ -49,8 +53,8 @@ public class LoginRateLimiter {
 
 	/** Throws 429 with Retry-After when either the IP or the account is over its limit. */
 	public void check(String ip, String email) {
-		consume(byIp, "ip:" + ip, perIpPerMinute);
-		consume(byAccount, "account:" + User.normalizeEmail(email), perAccountPerMinute);
+		consume(byIp, "ip", ip, perIpPerMinute);
+		consume(byAccount, "account", User.normalizeEmail(email), perAccountPerMinute);
 	}
 
 	/** Forgets all buckets. Used between tests, which all come from the same IP. */
@@ -59,10 +63,11 @@ public class LoginRateLimiter {
 		byAccount.clear();
 	}
 
-	private void consume(Map<String, Bucket> buckets, String key, int perMinute) {
+	private void consume(Map<String, Bucket> buckets, String scope, String key, int perMinute) {
 		Bucket bucket = buckets.computeIfAbsent(key, (k) -> newBucket(perMinute));
 		ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
 		if (!probe.isConsumed()) {
+			metrics.rateLimited(scope);
 			long retryAfterSeconds = Math.max(1, Duration.ofNanos(probe.getNanosToWaitForRefill()).toSeconds());
 			throw new ApiException(HttpStatus.TOO_MANY_REQUESTS, RATE_LIMITED,
 					"Too many login attempts. Try again in " + retryAfterSeconds + " seconds.",

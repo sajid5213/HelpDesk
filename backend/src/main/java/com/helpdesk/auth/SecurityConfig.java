@@ -1,7 +1,9 @@
 package com.helpdesk.auth;
 
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,7 +19,23 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 class SecurityConfig {
 
+	/**
+	 * Actuator (health, prometheus) runs on its own management port, which is never published
+	 * publicly: only Prometheus reaches it over the private network. Open there, absent elsewhere.
+	 */
 	@Bean
+	@Order(1)
+	SecurityFilterChain managementFilterChain(HttpSecurity http) {
+		http.securityMatcher(EndpointRequest.toAnyEndpoint())
+			.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.csrf(AbstractHttpConfigurer::disable)
+			.requestCache((cache) -> cache.disable())
+			.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
+		return http.build();
+	}
+
+	@Bean
+	@Order(2)
 	SecurityFilterChain securityFilterChain(HttpSecurity http, JsonAuthEntryPoint entryPoint,
 			JsonAccessDeniedHandler accessDeniedHandler) {
 		http.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -31,7 +49,6 @@ class SecurityConfig {
 			.authorizeHttpRequests((requests) -> requests
 				.requestMatchers("/auth/token", "/auth/refresh", "/auth/logout").permitAll()
 				.requestMatchers("/.well-known/jwks.json").permitAll()
-				.requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
 				// The React app's pages and files hold no data; everything it shows comes from /api.
 				.requestMatchers(HttpMethod.GET, "/", "/index.html", "/favicon.svg", "/assets/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/login", "/tickets", "/tickets/{id:\\d+}").permitAll()

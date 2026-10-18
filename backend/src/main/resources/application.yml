@@ -29,10 +29,30 @@ server:
   port: ${PORT:8090}
 
 management:
+  # Actuator lives on its own port, never published publicly; Prometheus scrapes it over the private network.
+  server:
+    port: ${MANAGEMENT_PORT:8091}
   endpoints:
     web:
       exposure:
-        include: health
+        include: health, prometheus
+  tracing:
+    # Off unless Tempo is running (compose.observability.yaml), so the app doesn't log failed exports.
+    export:
+      enabled: ${TRACING_EXPORT_ENABLED:false}
+    sampling:
+      probability: ${TRACING_SAMPLE:1.0}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    distribution:
+      # Histogram buckets so Grafana can show p50/p95 latency.
+      percentiles-histogram:
+        http.server.requests: true
+        helpdesk.ai.call: true
 
 db-scheduler:
   # Tables come from Flyway; scheduler runs with a single thread pool shared by all jobs.

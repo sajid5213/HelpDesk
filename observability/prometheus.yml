@@ -1,0 +1,16 @@
+# Scrapes the app's private management port (8091). Two targets, so one Prometheus works with
+# either stack: the dev backend on your machine, or the "app" container of compose.prod.yaml.
+# The one that isn't running just shows as down.
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: helpdesk
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["host.docker.internal:8091"]
+        labels:
+          env: dev
+      - targets: ["app:8091"]
+        labels:
+          env: prod

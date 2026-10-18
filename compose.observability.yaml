@@ -1,0 +1,53 @@
+# Prometheus (metrics), Tempo (traces) and Grafana (dashboards). Works with either stack:
+#   dev:  docker compose -f compose.observability.yaml up -d
+#   prod: docker compose -f compose.prod.yaml -f compose.observability.yaml --env-file .env.prod up -d
+# Ports bind to 127.0.0.1 only. Open Grafana at http://localhost:3000.
+services:
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    extra_hosts:
+      # Lets Prometheus reach the dev backend on your machine (also on Linux).
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:9090:9090"
+
+  tempo:
+    image: grafana/tempo:3.0.4
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./observability/tempo.yaml:/etc/tempo.yaml:ro
+      - tempo-data:/var/tempo
+    ports:
+      # OTLP over HTTP, for the dev backend running on your machine.
+      - "127.0.0.1:4318:4318"
+
+  grafana:
+    image: grafana/grafana:13.2.4
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+      - tempo
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  prometheus-data:
+  tempo-data:
+  grafana-data:

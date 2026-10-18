@@ -54,6 +54,24 @@ docker compose -f compose.prod.yaml --env-file .env.prod down   # add -v to dele
 - **AI is off by default:** the Claude Code CLI can't run inside the container. Set `HELPDESK_AI_MODE=api` and `ANTHROPIC_API_KEY` to use the Claude API, which is billed per use.
 - **Plain HTTP works only on localhost.** The refresh cookie is `Secure`, so any other host needs HTTPS.
 
+## Observability (metrics, traces, dashboard)
+
+```bash
+docker compose -f compose.observability.yaml up -d      # Prometheus, Tempo, Grafana
+# then start the backend with traces on: add TRACING_EXPORT_ENABLED=true to backend/.env
+# with the Docker stack instead:
+docker compose -f compose.prod.yaml -f compose.observability.yaml --env-file .env.prod up -d
+```
+
+- **Grafana:** http://localhost:3000 (user `admin`, password `GRAFANA_ADMIN_PASSWORD`, default `admin` locally). Open **Dashboards → HelpDesk → HelpDesk** for the dashboard. It has four rows:
+  - **Auth:** logins, refreshes, token reuse, lockouts, rate limits, admin actions.
+  - **Tickets and AI:** tickets opened, AI outcomes, Claude latency and errors.
+  - **Background jobs:** due jobs, runs and duration.
+  - **API:** requests, errors and latency.
+- **Traces:** Grafana → **Explore → Tempo**. A student email shows as `http post /api/inbound/emails`. The AI work is its own trace, `ai process ticket`: the database reads, `claude classify`, `claude draft_reply` and the writes all nest under it. The AI job runs later on the scheduler, so its trace isn't linked to the request that queued it.
+- **Raw metrics:** `curl localhost:8091/actuator/prometheus`. Actuator runs on its own management port, which is never published by Docker; Prometheus scrapes it over the private network. The public port (8090/8080) doesn't serve it.
+- **What's never recorded:** passwords, tokens, email addresses or email bodies. Metric tags are fixed values (event type, outcome), and SQL spans carry the query text only, never the values.
+
 ## API tools
 
 - **Swagger UI:** http://localhost:8090/swagger-ui.html. Log in with `POST /auth/token`, click **Authorize**, and paste the `accessToken`.

@@ -39,6 +39,11 @@ services:
       # The Claude Code CLI can't run in the container: use api (with a key) or off.
       HELPDESK_AI_MODE: ${HELPDESK_AI_MODE:-off}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Traces go to Tempo from compose.observability.yaml; set TRACING_EXPORT_ENABLED=true when it runs.
+      TRACING_EXPORT_ENABLED: ${TRACING_EXPORT_ENABLED:-false}
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://tempo:4318/v1/traces
+    # Actuator's management port 8091 is deliberately not published: only Prometheus, on this
+    # private network, can reach it.
 
 volumes:
   helpdesk-prod-pgdata:

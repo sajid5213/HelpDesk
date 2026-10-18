@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.helpdesk.common.HelpdeskMetrics;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,8 +30,11 @@ public class InboundEmailService {
 
 	private final Clock clock;
 
+	private final HelpdeskMetrics metrics;
+
 	InboundEmailService(TicketRepository tickets, TicketMessageRepository messages, ApplicationEventPublisher events,
-			Clock clock) {
+			Clock clock, HelpdeskMetrics metrics) {
+		this.metrics = metrics;
 		this.tickets = tickets;
 		this.messages = messages;
 		this.events = events;
@@ -46,7 +51,10 @@ public class InboundEmailService {
 		boolean newTicket = thread.isEmpty();
 		Ticket ticket = thread.orElseGet(
 				() -> tickets.save(new Ticket(email.subject(), email.fromEmail(), email.fromName(), now)));
-		if (!newTicket) {
+		if (newTicket) {
+			metrics.ticketOpened();
+		}
+		else {
 			ticket.receivedMessage(now);
 		}
 		TicketMessage message = messages.save(TicketMessage.fromStudent(ticket.getId(), email.body(), now));

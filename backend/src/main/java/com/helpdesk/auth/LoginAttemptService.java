@@ -3,6 +3,7 @@ package com.helpdesk.auth;
 import java.time.Clock;
 import java.time.Duration;
 
+import com.helpdesk.common.HelpdeskMetrics;
 import com.helpdesk.config.HelpdeskProperties;
 import com.helpdesk.user.User;
 import com.helpdesk.user.UserRepository;
@@ -22,8 +23,11 @@ public class LoginAttemptService {
 
 	private final Duration lockDuration;
 
-	LoginAttemptService(UserRepository users, Clock clock, HelpdeskProperties properties) {
+	private final HelpdeskMetrics metrics;
+
+	LoginAttemptService(UserRepository users, Clock clock, HelpdeskProperties properties, HelpdeskMetrics metrics) {
 		this.users = users;
+		this.metrics = metrics;
 		this.clock = clock;
 		this.maxFailures = properties.auth().lockout().maxFailures();
 		this.lockDuration = properties.auth().lockout().duration();
@@ -40,6 +44,7 @@ public class LoginAttemptService {
 			if (failures >= maxFailures) {
 				current.setLockedUntil(clock.instant().plus(lockDuration));
 				current.setFailedLoginCount(0);
+				metrics.lockout();
 			}
 			else {
 				current.setFailedLoginCount(failures);

@@ -1,7 +1,10 @@
 package com.helpdesk.audit;
 
 import java.time.Clock;
+import java.util.Arrays;
 import java.util.UUID;
+
+import com.helpdesk.common.HelpdeskMetrics;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -14,9 +17,13 @@ public class AuditService {
 
 	private final Clock clock;
 
-	AuditService(AuthEventRepository events, Clock clock) {
+	private final HelpdeskMetrics metrics;
+
+	AuditService(AuthEventRepository events, Clock clock, HelpdeskMetrics metrics) {
 		this.events = events;
 		this.clock = clock;
+		this.metrics = metrics;
+		metrics.registerAuthEventTypes(Arrays.stream(AuthEventType.values()).map(Enum::name).toList());
 	}
 
 	/**
@@ -35,6 +42,7 @@ public class AuditService {
 	@Transactional
 	public void record(AuthEventType type, UUID userIdOrNull, UUID actorIdOrNull, String ipOrNull) {
 		events.save(new AuthEvent(type, userIdOrNull, actorIdOrNull, ipOrNull, clock.instant()));
+		metrics.authEvent(type.name());
 	}
 
 }

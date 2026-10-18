@@ -12,3 +12,12 @@ helpdesk:
 
 db-scheduler:
   polling-interval: 500ms
+
+management:
+  # Random free port, so test runs never collide with a running backend.
+  server:
+    port: 0
+  # Tests never send traces anywhere.
+  tracing:
+    export:
+      enabled: false
