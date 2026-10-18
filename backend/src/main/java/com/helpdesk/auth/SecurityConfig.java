@@ -2,6 +2,7 @@ package com.helpdesk.auth;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -31,7 +32,10 @@ class SecurityConfig {
 				.requestMatchers("/auth/token", "/auth/refresh", "/auth/logout").permitAll()
 				.requestMatchers("/.well-known/jwks.json").permitAll()
 				.requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
-				// API docs. Public for local development; Phase 7 decides whether production exposes them.
+				// The React app's pages and files hold no data; everything it shows comes from /api.
+				.requestMatchers(HttpMethod.GET, "/", "/index.html", "/favicon.svg", "/assets/**").permitAll()
+				.requestMatchers(HttpMethod.GET, "/login", "/tickets", "/tickets/{id:\\d+}").permitAll()
+				// API docs. Public for local development; the prod profile turns them off.
 				.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
 				.requestMatchers("/error").permitAll()
 				.anyRequest().authenticated())

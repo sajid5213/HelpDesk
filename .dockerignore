@@ -1,0 +1,12 @@
+# Keep secrets, build output and tooling out of the image build.
+**/.env
+**/.env.*
+.git
+.github
+.claude
+.vscode
+**/node_modules
+**/dist
+**/target
+postman
+*.md

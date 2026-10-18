@@ -38,6 +38,22 @@ Open http://localhost:5173 and sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Th
 
 How the web app signs in: the access token lives only in memory (never in localStorage or sessionStorage). The refresh token is an HttpOnly, SameSite=Strict cookie scoped to `/auth`, so page scripts can't read it. On a 401 the app refreshes once, shared across parallel requests, and retries; if that fails it returns to sign in. Reloading the page restores the session from the cookie.
 
+## Run with Docker (production-style)
+
+One image holds everything: Spring Boot serves the API and the built React app. `compose.prod.yaml` runs it with its own Postgres. That database is separate from the dev one and isn't reachable from outside.
+
+```bash
+cp .env.prod.example .env.prod     # gitignored; fill in DB_PASSWORD, HELPDESK_KEK, ADMIN_EMAIL, ADMIN_PASSWORD
+docker compose -f compose.prod.yaml --env-file .env.prod up -d --build
+# open http://localhost:8080 (or the HELPDESK_HTTP_PORT you set)
+docker compose -f compose.prod.yaml --env-file .env.prod down   # add -v to delete its database
+```
+
+- **No secrets in the image:** they come from `.env.prod` at run time.
+- **`prod` profile:** turns off Swagger UI and the API docs.
+- **AI is off by default:** the Claude Code CLI can't run inside the container. Set `HELPDESK_AI_MODE=api` and `ANTHROPIC_API_KEY` to use the Claude API, which is billed per use.
+- **Plain HTTP works only on localhost.** The refresh cookie is `Secure`, so any other host needs HTTPS.
+
 ## API tools
 
 - **Swagger UI:** http://localhost:8090/swagger-ui.html. Log in with `POST /auth/token`, click **Authorize**, and paste the `accessToken`.
@@ -58,6 +74,8 @@ npm run test       # Vitest: token handling and sign-in messages
 npm run lint
 npm run build
 ```
+
+On GitHub, `.github/workflows/ci.yml` runs all of the above on every push and pull request, then checks that the Docker image builds.
 
 ## Try the auth API
 

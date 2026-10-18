@@ -1,0 +1,44 @@
+# Production-style stack: the app image plus Postgres. Secrets come from an env file you keep
+# outside git (copy .env.prod.example to .env.prod):
+#   docker compose -f compose.prod.yaml --env-file .env.prod up -d --build
+name: helpdesk-prod
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: helpdesk
+      POSTGRES_USER: helpdesk
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+    # No published port: only the app can reach the database.
+    volumes:
+      - helpdesk-prod-pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helpdesk -d helpdesk"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    image: helpdesk:local
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${HELPDESK_HTTP_PORT:-8080}:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/helpdesk
+      DB_USER: helpdesk
+      DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+      HELPDESK_KEK: ${HELPDESK_KEK:?set HELPDESK_KEK}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?set ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD}
+      # The Claude Code CLI can't run in the container: use api (with a key) or off.
+      HELPDESK_AI_MODE: ${HELPDESK_AI_MODE:-off}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+
+volumes:
+  helpdesk-prod-pgdata:

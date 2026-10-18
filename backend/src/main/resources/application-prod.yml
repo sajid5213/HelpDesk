@@ -1,0 +1,6 @@
+# Production profile (the Docker image turns it on). Secrets come from environment variables.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
