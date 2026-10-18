@@ -595,21 +595,59 @@
       }
     },
     {
-      "type": "row",
-      "title": "Background jobs",
+      "type": "timeseries",
+      "title": "Emails to students (per 5 min)",
       "id": 13,
-      "collapsed": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
-        "h": 1,
-        "w": 24,
+        "h": 6,
+        "w": 12,
         "x": 0,
         "y": 24
       },
-      "panels": []
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (outcome) (increase(helpdesk_emails_total{env=~\"$env\"}[5m]))",
+          "legendFormat": "{{outcome}}",
+          "refId": "A",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "custom": {
+            "fillOpacity": 12,
+            "lineWidth": 2,
+            "stacking": {
+              "mode": "none"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "description": "sent: delivered to the mail server. failed: gave up after every retry (the reply is still saved on the ticket)."
     },
     {
       "type": "stat",
-      "title": "Jobs due, not started",
+      "title": "Emails failed (24 h)",
       "id": 14,
       "datasource": {
         "type": "prometheus",
@@ -618,8 +656,78 @@
       "gridPos": {
         "h": 8,
         "w": 4,
+        "x": 12,
+        "y": 24
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "round(sum(increase(helpdesk_emails_total{outcome=\"failed\",env=~\"$env\"}[24h])))",
+          "legendFormat": "failed",
+          "refId": "A",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "colorMode": "background",
+        "graphMode": "none"
+      }
+    },
+    {
+      "type": "row",
+      "title": "Background jobs",
+      "id": 15,
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
         "x": 0,
-        "y": 25
+        "y": 30
+      },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Jobs due, not started",
+      "id": 16,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 4,
+        "x": 0,
+        "y": 31
       },
       "targets": [
         {
@@ -671,7 +779,7 @@
     {
       "type": "timeseries",
       "title": "Job runs (per 5 min)",
-      "id": 15,
+      "id": 17,
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -680,7 +788,7 @@
         "h": 8,
         "w": 10,
         "x": 4,
-        "y": 25
+        "y": 31
       },
       "targets": [
         {
@@ -721,7 +829,7 @@
     {
       "type": "timeseries",
       "title": "Average job duration",
-      "id": 16,
+      "id": 18,
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -730,7 +838,7 @@
         "h": 8,
         "w": 10,
         "x": 14,
-        "y": 25
+        "y": 31
       },
       "targets": [
         {
@@ -772,20 +880,20 @@
     {
       "type": "row",
       "title": "API",
-      "id": 17,
+      "id": 19,
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 39
       },
       "panels": []
     },
     {
       "type": "timeseries",
       "title": "Requests per second",
-      "id": 18,
+      "id": 20,
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -794,7 +902,7 @@
         "h": 8,
         "w": 9,
         "x": 0,
-        "y": 34
+        "y": 40
       },
       "targets": [
         {
@@ -836,7 +944,7 @@
     {
       "type": "timeseries",
       "title": "Server errors (5xx) per second",
-      "id": 19,
+      "id": 21,
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -845,7 +953,7 @@
         "h": 8,
         "w": 6,
         "x": 9,
-        "y": 34
+        "y": 40
       },
       "targets": [
         {
@@ -887,7 +995,7 @@
     {
       "type": "timeseries",
       "title": "p95 latency by endpoint",
-      "id": 20,
+      "id": 22,
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -896,7 +1004,7 @@
         "h": 8,
         "w": 9,
         "x": 15,
-        "y": 34
+        "y": 40
       },
       "targets": [
         {

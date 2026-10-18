@@ -9,6 +9,11 @@ helpdesk:
     # Fast retries so failure tests finish in seconds.
     max-attempts: 3
     retry-delay: PT0.2S
+  email:
+    # Tests use RecordingEmailSender; fast retries so failure tests finish quickly.
+    mode: log
+    max-attempts: 3
+    retry-delay: PT0.2S
 
 db-scheduler:
   polling-interval: 500ms

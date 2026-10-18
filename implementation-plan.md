@@ -88,5 +88,5 @@ See `project-scope.md` for what we're building and `tech-stack.md` for how.
 
 ## Phase 9 (Stretch): Email
 
-- [ ] Send agent and AI replies over SMTP with Spring Mail
-- [ ] Run Mailpit locally to catch outgoing emails
+- [x] Send agent and AI replies over SMTP with Spring Mail
+- [x] Run Mailpit locally to catch outgoing emails

@@ -54,6 +54,7 @@ class TicketActionsTest extends IntegrationTest {
 		Ticket reloaded = fixtures.reload(ticket);
 		assertThat(reloaded.getFirstResponseAt()).isNotNull();
 		assertThat(reloaded.getResolvedAt()).isNotNull();
+		eventually(() -> !sentEmails.sent().isEmpty());
 		assertThat(sentEmails.sent()).singleElement().satisfies((email) -> {
 			assertThat(email.to()).isEqualTo(ticket.getStudentEmail());
 			assertThat(email.subject()).isEqualTo("Re: [#" + ticket.getId() + "] " + ticket.getSubject());

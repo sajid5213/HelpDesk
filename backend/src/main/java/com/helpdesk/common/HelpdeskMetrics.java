@@ -25,6 +25,8 @@ public class HelpdeskMetrics {
 
 	public static final String AI_OUTCOMES = "helpdesk.ai.outcomes";
 
+	public static final String EMAILS = "helpdesk.emails";
+
 	/** How the AI pipeline ended for one student message. */
 	public enum AiOutcome {
 
@@ -49,6 +51,9 @@ public class HelpdeskMetrics {
 		for (AiOutcome outcome : AiOutcome.values()) {
 			registry.counter(AI_OUTCOMES, "outcome", outcome.tag());
 		}
+		for (String outcome : List.of("sent", "failed")) {
+			registry.counter(EMAILS, "outcome", outcome);
+		}
 	}
 
 	/** Registers every auth event type at 0, so each shows on dashboards before it first happens. */
@@ -72,6 +77,11 @@ public class HelpdeskMetrics {
 
 	public void ticketOpened() {
 		registry.counter(TICKETS_OPENED).increment();
+	}
+
+	/** One email job finished: sent, or given up after every retry. */
+	public void emailSent(boolean sent) {
+		registry.counter(EMAILS, "outcome", sent ? "sent" : "failed").increment();
 	}
 
 	public void aiOutcome(AiOutcome outcome) {

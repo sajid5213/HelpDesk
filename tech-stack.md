@@ -104,5 +104,5 @@
 
 - For now, inbound email is simulated through an API endpoint only. Replies are stored on the ticket.
 - Real email is built only after auth, frontend, deployment, and observability are done.
-- **Stretch goal:** Spring Mail sends replies over SMTP, behind the same email sender interface as the stand-in, so nothing else changes. **Mailpit** runs locally in Docker Compose to catch and show those emails.
+- **Built (Phase 9):** Spring Mail sends replies over SMTP, behind the same email sender interface as the stand-in, so nothing else changed. **Mailpit** runs in Docker Compose to catch and show those emails. Each email is a db-scheduler job stored in the same transaction as the reply (transactional outbox), retried with backoff, so a mail-server outage never loses an email.
 - **Going live later (not planned):** Mailpit can't receive real email from students. If the app ever handles real email, **Mailgun** is the chosen provider: Mailgun Routes forward incoming emails to a webhook (HMAC signature checked, old or reused requests rejected), and outgoing mail uses Mailgun SMTP. This needs a domain with Mailgun's DNS and MX records.

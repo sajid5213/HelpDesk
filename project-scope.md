@@ -66,7 +66,7 @@ A ticket management system that uses AI to **automatically classify, respond to,
 - **Refund requests always go to an agent.** The AI never sends a reply on a refund ticket by itself.
 - All other tickets go to an agent as well.
 - Personalization uses **only what's in the email**: the student's name, the course they mention, and a direct answer to what they actually asked. No lookup of enrollment or purchase records.
-- Until real email is built (`tech-stack.md` §8), "sending" goes through a stand-in email sender that saves the reply on the ticket and logs it, and the ticket moves to Resolved as if sent. Swapping in real email later changes nothing else *(our call)*.
+- Replies are saved on the ticket and emailed to the student over SMTP (`tech-stack.md` §8); locally Mailpit catches them. The ticket moves to Resolved when the reply is saved, and the email is retried in the background if the mail server is down *(our call)*.
 - Safety net *(our call)*: if an email looks like an FAQ but the knowledge base doesn't clearly answer it, the AI does not guess. It routes the ticket to an agent instead.
 
 ### 5.5 AI summaries

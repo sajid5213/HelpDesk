@@ -1,5 +1,9 @@
 package com.helpdesk.common;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.function.BooleanSupplier;
+
 import org.junit.jupiter.api.BeforeEach;
 
 import com.helpdesk.TestcontainersConfiguration;
@@ -48,6 +52,23 @@ public abstract class IntegrationTest {
 
 	@LocalManagementPort
 	private int managementPort;
+
+	/** Waits up to 15 seconds for something a background job does (send an email, run the AI). */
+	protected static void eventually(BooleanSupplier condition) {
+		Instant deadline = Instant.now().plus(Duration.ofSeconds(15));
+		while (!condition.getAsBoolean()) {
+			if (Instant.now().isAfter(deadline)) {
+				throw new AssertionError("condition not met within 15 seconds");
+			}
+			try {
+				Thread.sleep(50);
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+				throw new IllegalStateException(ex);
+			}
+		}
+	}
 
 	/** A client for the private management port (actuator: health, prometheus). */
 	protected RestTestClient management() {

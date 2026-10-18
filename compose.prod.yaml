@@ -42,8 +42,19 @@ services:
       # Traces go to Tempo from compose.observability.yaml; set TRACING_EXPORT_ENABLED=true when it runs.
       TRACING_EXPORT_ENABLED: ${TRACING_EXPORT_ENABLED:-false}
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://tempo:4318/v1/traces
+      # Email goes to the Mailpit container below; no real inbox is ever reached.
+      HELPDESK_EMAIL_MODE: ${HELPDESK_EMAIL_MODE:-smtp}
+      MAIL_HOST: mailpit
+      MAIL_PORT: "1025"
     # Actuator's management port 8091 is deliberately not published: only Prometheus, on this
     # private network, can reach it.
+
+  # Catches the app's outgoing email. Inbox: http://localhost:8026 (8025 is the dev one).
+  mailpit:
+    image: axllent/mailpit:v1.31.3
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8026:8025"
 
 volumes:
   helpdesk-prod-pgdata:

@@ -54,6 +54,23 @@ docker compose -f compose.prod.yaml --env-file .env.prod down   # add -v to dele
 - **AI is off by default:** the Claude Code CLI can't run inside the container. Set `HELPDESK_AI_MODE=api` and `ANTHROPIC_API_KEY` to use the Claude API, which is billed per use.
 - **Plain HTTP works only on localhost.** The refresh cookie is `Secure`, so any other host needs HTTPS.
 
+## Email
+
+Replies to students are sent over SMTP with Spring Mail. Locally, **Mailpit** catches every email, so nothing reaches a real inbox.
+
+```bash
+docker compose up -d                 # Postgres + Mailpit
+# backend/.env: HELPDESK_EMAIL_MODE=smtp, then restart the backend
+# inbox: http://localhost:8025 (the Docker stack's own Mailpit: http://localhost:8026)
+```
+
+- **Mode:** `HELPDESK_EMAIL_MODE=log` (the default) only logs that an email would go out. `smtp` sends it to `MAIL_HOST`:`MAIL_PORT`, which defaults to `localhost:1025`, Mailpit.
+- **Every email is a background job, stored in the same database transaction as the reply** (a transactional outbox):
+  - a reply that rolls back never emails;
+  - a saved reply always will, even if the mail server is down;
+  - a failed send is retried 5 times with growing delays, then counted as failed (`helpdesk_emails_total{outcome="failed"}`, also on the dashboard). The reply stays on the ticket either way.
+- **Threading:** the subject is `Re: [#id] …`, so when the student answers, it lands back on the same ticket.
+
 ## Observability (metrics, traces, dashboard)
 
 ```bash
@@ -152,7 +169,7 @@ curl -s -H "Authorization: Bearer $AGENT" -H 'Content-Type: application/json' -d
 
 - A student email that mentions `[#1]` in the subject (or sends `ticketRef`) from the same address goes onto ticket 1, and reopens it if it was resolved. A closed ticket, an unknown number, or a different sender starts a new ticket.
 - Status moves: OPEN and RESOLVED switch back and forth; either can be CLOSED; CLOSED is final. Resolved tickets close automatically after 7 days without a reply.
-- Until real email exists, replies are logged (recipient and ticket only), not sent.
+- Replies to students (from agents and the AI) are emailed: see [Email](#email). With `HELPDESK_EMAIL_MODE=log` (the default) they're only logged (recipient and ticket only).
 
 ## AI (Claude)
 

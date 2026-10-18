@@ -9,7 +9,7 @@ import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("helpdesk")
-public record HelpdeskProperties(Auth auth, Admin admin, Tickets tickets, Ai ai) {
+public record HelpdeskProperties(Auth auth, Admin admin, Tickets tickets, Ai ai, Email email) {
 
 	public record Auth(String issuer, String audience, Duration accessTokenTtl, Duration refreshTokenTtl,
 			Duration keyRotationInterval, Duration keyRetireBuffer, String keyEncryptionKey, Lockout lockout,
@@ -91,6 +91,28 @@ public record HelpdeskProperties(Auth auth, Admin admin, Tickets tickets, Ai ai)
 		public String toString() {
 			return "Ai[mode=" + mode + ", enabled=" + enabled() + ", classifyModel=" + classifyModel + ", replyModel="
 					+ replyModel + "]";
+		}
+
+	}
+
+	/**
+	 * Outgoing email. {@code mode}: {@code log} (default) only logs that an email would go out;
+	 * {@code smtp} sends it through Spring Mail ({@code spring.mail.*}), e.g. to Mailpit locally.
+	 * Each email is a background job, retried up to {@code maxAttempts} times.
+	 */
+	public record Email(String mode, String from, int maxAttempts, Duration retryDelay) {
+
+		public static final String LOG = "log";
+
+		public static final String SMTP = "smtp";
+
+		public Email {
+			mode = mode == null || mode.isBlank() ? LOG : mode.trim().toLowerCase(Locale.ROOT);
+			if (!Set.of(LOG, SMTP).contains(mode)) {
+				throw new IllegalStateException("helpdesk.email.mode must be log or smtp, not '" + mode + "'");
+			}
+			maxAttempts = Math.max(1, maxAttempts);
+			retryDelay = retryDelay == null ? Duration.ofSeconds(30) : retryDelay;
 		}
 
 	}

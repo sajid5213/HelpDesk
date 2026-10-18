@@ -1,8 +1,8 @@
 package com.helpdesk.email;
 
 /**
- * Sends email to students. Swappable: {@link LoggingEmailSender} now, SMTP (Spring Mail) in
- * Phase 9, without changing callers.
+ * Sends email to students: {@link LoggingEmailSender} (log only) or {@link SmtpEmailSender}, chosen
+ * by {@code helpdesk.email.mode}. Called by the send job, never directly by business code.
  */
 public interface EmailSender {
 
