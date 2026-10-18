@@ -1,6 +1,6 @@
 # HelpDesk
 
-AI-assisted support ticket system for a coding-course business. Spring Boot backend with hand-built JWT auth, minimal React frontend, Claude for classification and replies.
+AI-assisted support ticket system: customer emails become tickets, Claude sorts and summarizes them and drafts replies, and agents work them in a web console. Spring Boot backend with hand-built JWT auth (RS256, key rotation, refresh-token reuse detection), React frontend, PostgreSQL, Docker, and Prometheus/Grafana/Tempo observability.
 
 - What we're building: [`project-scope.md`](project-scope.md)
 - How: [`tech-stack.md`](tech-stack.md)
