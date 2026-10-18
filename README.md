@@ -19,6 +19,7 @@ AI-assisted support ticket system for a coding-course business. Spring Boot back
 cp backend/.env.example backend/.env
 #    HELPDESK_KEK:   openssl rand -base64 32
 #    ADMIN_EMAIL / ADMIN_PASSWORD: the first admin, created on first start (password >= 12 chars)
+#    ANTHROPIC_API_KEY: optional; turns on AI classification and replies
 
 # 1. Database (local-only throwaway credentials: helpdesk / helpdesk)
 docker compose up -d
@@ -43,7 +44,8 @@ npm run dev
 
 ```bash
 cd backend
-./mvnw verify      # starts its own PostgreSQL container; Docker must be running
+./mvnw verify      # starts its own PostgreSQL container; Docker must be running; never calls Claude
+ANTHROPIC_API_KEY=sk-... ./mvnw test -Dgroups=live -Dtest.excludedGroups=   # optional: real Claude calls (costs a little)
 ```
 
 ```bash
@@ -110,3 +112,23 @@ curl -s -H "Authorization: Bearer $AGENT" -H 'Content-Type: application/json' -d
 - A student email that mentions `[#1]` in the subject (or sends `ticketRef`) from the same address goes onto ticket 1, and reopens it if it was resolved. A closed ticket, an unknown number, or a different sender starts a new ticket.
 - Status moves: OPEN and RESOLVED switch back and forth; either can be CLOSED; CLOSED is final. Resolved tickets close automatically after 7 days without a reply.
 - Until real email exists, replies are logged (recipient and ticket only), not sent.
+
+## AI (Claude)
+
+Turn AI on in one of two ways (otherwise tickets get `aiStatus: SKIPPED` and agents handle them):
+
+- **Claude API:** `ANTHROPIC_API_KEY=sk-ant-...` in `backend/.env`. Billed per use; the production path.
+- **Claude Code, free on your Claude plan (local testing only):** `HELPDESK_AI_MODE=claude-code` in `backend/.env`. The backend runs `claude -p` (Claude Code's command line, signed in with your own subscription) with no tools, no saved sessions, and none of your settings or plugins, and never passes an API key to it. It counts against your plan's usage limits, takes a few seconds per call, and only works where Claude Code is installed and logged in, so not in Docker or on OCI.
+
+Then every student email is handled by a background job:
+
+1. **Classify and summarize** with Claude Haiku 5.5: category, a one-line summary for agents, and whether the student asks for money back in any wording.
+2. **Draft a reply** with Claude Sonnet 5.5, using only the knowledge base articles.
+3. **Answer automatically only if all of these hold:** it is a general or technical question, the student does not mention a refund, the articles fully answer it (and the cited articles exist), nobody has claimed the ticket yet, and it is the ticket's first message. The ticket is then resolved and the reply emailed.
+4. **Otherwise** the draft is saved as `suggestedReply` for an agent. Refunds always land here.
+
+The ticket's `aiStatus` shows where it is: `PENDING`, `DONE`, `FAILED` (Claude kept failing after 5 tries with backoff), or `SKIPPED` (no API key, or Claude declined the request). `FAILED` and `SKIPPED` tickets simply stay with the agents.
+
+Student emails are treated as untrusted: they are wrapped in tags with `<` and `>` escaped, and the prompts tell Claude never to follow instructions inside them or to promise refunds.
+
+Try it with **8 AI demo** in the Postman collection.

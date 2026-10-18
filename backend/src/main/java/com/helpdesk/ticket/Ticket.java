@@ -51,6 +51,13 @@ public class Ticket {
 	@Column(name = "auto_resolved", nullable = false)
 	private boolean autoResolved;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "ai_status", nullable = false)
+	private AiStatus aiStatus = AiStatus.PENDING;
+
+	@Column(name = "ai_processed_at")
+	private Instant aiProcessedAt;
+
 	@Column(name = "assignee_id")
 	private UUID assigneeId;
 
@@ -139,6 +146,29 @@ public class Ticket {
 		this.updatedAt = now;
 	}
 
+	/** AI results. A category an agent set by hand is never overwritten. */
+	public void applyAi(TicketCategory category, String summary, Instant now) {
+		if (!categorySetManually && category != null) {
+			this.category = category;
+		}
+		this.aiSummary = summary;
+		this.aiStatus = AiStatus.DONE;
+		this.aiProcessedAt = now;
+	}
+
+	public void suggestReply(String reply) {
+		this.suggestedReply = reply;
+	}
+
+	/** The AI answered the student itself: counts as the first response, and resolves the ticket. */
+	public void autoResolve(Instant now) {
+		if (firstResponseAt == null) {
+			firstResponseAt = now;
+		}
+		autoResolved = true;
+		resolve(now);
+	}
+
 	public boolean isAssignedTo(UUID userId) {
 		return assigneeId != null && assigneeId.equals(userId);
 	}
@@ -185,6 +215,14 @@ public class Ticket {
 
 	public boolean isAutoResolved() {
 		return autoResolved;
+	}
+
+	public AiStatus getAiStatus() {
+		return aiStatus;
+	}
+
+	public Instant getAiProcessedAt() {
+		return aiProcessedAt;
 	}
 
 	public UUID getAssigneeId() {

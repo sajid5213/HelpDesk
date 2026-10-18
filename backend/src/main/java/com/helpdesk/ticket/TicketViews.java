@@ -11,23 +11,23 @@ public final class TicketViews {
 	}
 
 	public record TicketSummary(Long id, String subject, String studentEmail, String studentName, TicketStatus status,
-			TicketCategory category, UUID assigneeId, Instant createdAt, Instant updatedAt) {
+			TicketCategory category, AiStatus aiStatus, UUID assigneeId, Instant createdAt, Instant updatedAt) {
 
 		static TicketSummary of(Ticket t) {
 			return new TicketSummary(t.getId(), t.getSubject(), t.getStudentEmail(), t.getStudentName(), t.getStatus(),
-					t.getCategory(), t.getAssigneeId(), t.getCreatedAt(), t.getUpdatedAt());
+					t.getCategory(), t.getAiStatus(), t.getAssigneeId(), t.getCreatedAt(), t.getUpdatedAt());
 		}
 
 	}
 
 	public record TicketDetail(Long id, String subject, String studentEmail, String studentName, TicketStatus status,
-			TicketCategory category, boolean categorySetManually, UUID assigneeId, String aiSummary,
+			TicketCategory category, boolean categorySetManually, UUID assigneeId, AiStatus aiStatus, String aiSummary,
 			String suggestedReply, boolean autoResolved, Instant createdAt, Instant updatedAt, Instant firstResponseAt,
 			Instant resolvedAt, Instant closedAt, List<MessageView> messages, List<NoteView> notes) {
 
 		static TicketDetail of(Ticket t, List<TicketMessage> messages, List<TicketNote> notes) {
 			return new TicketDetail(t.getId(), t.getSubject(), t.getStudentEmail(), t.getStudentName(), t.getStatus(),
-					t.getCategory(), t.isCategorySetManually(), t.getAssigneeId(), t.getAiSummary(),
+					t.getCategory(), t.isCategorySetManually(), t.getAssigneeId(), t.getAiStatus(), t.getAiSummary(),
 					t.getSuggestedReply(), t.isAutoResolved(), t.getCreatedAt(), t.getUpdatedAt(),
 					t.getFirstResponseAt(), t.getResolvedAt(), t.getClosedAt(),
 					messages.stream().map(MessageView::of).toList(), notes.stream().map(NoteView::of).toList());

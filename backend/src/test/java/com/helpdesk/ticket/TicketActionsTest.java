@@ -1,23 +1,16 @@
 package com.helpdesk.ticket;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.helpdesk.common.IntegrationTest;
-import com.helpdesk.email.EmailSender;
-import com.helpdesk.email.OutboundEmail;
 import com.helpdesk.user.Role;
 import com.helpdesk.user.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.web.servlet.client.RestTestClient.ResponseSpec;
@@ -25,14 +18,11 @@ import org.springframework.test.web.servlet.client.RestTestClient.ResponseSpec;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-@Import({ TicketFixtures.class, TicketActionsTest.RecordingEmailConfig.class })
+@Import(TicketFixtures.class)
 class TicketActionsTest extends IntegrationTest {
 
 	@Autowired
 	TicketFixtures fixtures;
-
-	@Autowired
-	RecordingEmailSender sentEmails;
 
 	@Autowired
 	TicketMessageRepository messages;
@@ -46,7 +36,6 @@ class TicketActionsTest extends IntegrationTest {
 
 	@BeforeEach
 	void agentWithTicket() {
-		sentEmails.clear();
 		agent = testUsers.create(Role.AGENT);
 		bearer = testUsers.bearer(agent);
 	}
@@ -209,37 +198,6 @@ class TicketActionsTest extends IntegrationTest {
 			.contentType(MediaType.APPLICATION_JSON)
 			.body(body)
 			.exchange();
-	}
-
-	/** Replaces the logging sender so tests can see what would have been emailed. */
-	static class RecordingEmailSender implements EmailSender {
-
-		private final List<OutboundEmail> sent = new CopyOnWriteArrayList<>();
-
-		@Override
-		public void send(OutboundEmail email) {
-			sent.add(email);
-		}
-
-		List<OutboundEmail> sent() {
-			return sent;
-		}
-
-		void clear() {
-			sent.clear();
-		}
-
-	}
-
-	@TestConfiguration(proxyBeanMethods = false)
-	static class RecordingEmailConfig {
-
-		@Bean
-		@Primary
-		RecordingEmailSender recordingEmailSender() {
-			return new RecordingEmailSender();
-		}
-
 	}
 
 }

@@ -5,3 +5,10 @@ helpdesk:
   admin:
     email: admin@helpdesk.test
     password: test-admin-password-123
+  ai:
+    # Fast retries so failure tests finish in seconds.
+    max-attempts: 3
+    retry-delay: PT0.2S
+
+db-scheduler:
+  polling-interval: 500ms

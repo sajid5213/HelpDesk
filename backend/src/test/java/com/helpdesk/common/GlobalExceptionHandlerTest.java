@@ -40,7 +40,8 @@ class GlobalExceptionHandlerTest {
 				json.assertThat().extractingPath("$.status").isEqualTo(400);
 				json.assertThat().extractingPath("$.title").isEqualTo("Bad Request");
 				json.assertThat().doesNotHavePath("$.type");
-				json.assertThat().hasPath("$.detail");
+				json.assertThat().extractingPath("$.detail").isEqualTo("Some fields are missing or invalid.");
+				json.assertThat().extractingPath("$.errors.name").isEqualTo("must not be blank");
 				json.assertThat().extractingPath("$.instance").isEqualTo("/test/errors/validated");
 			});
 	}

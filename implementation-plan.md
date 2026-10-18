@@ -55,13 +55,13 @@ See `project-scope.md` for what we're building and `tech-stack.md` for how.
 
 ## Phase 5: AI Features
 
-- [ ] Integrate Claude through the Anthropic Java SDK (mocked in tests)
-- [ ] Process new tickets in the background with db-scheduler
-- [ ] Auto-classify tickets into a category (Haiku)
-- [ ] Generate an AI summary for each ticket (Haiku)
-- [ ] Generate a suggested reply from the knowledge base (Sonnet)
-- [ ] Auto-send personalized replies for FAQ emails the knowledge base answers (never for refunds)
-- [ ] Keep tickets open and retry when the AI fails or returns bad output
+- [x] Integrate Claude through the Anthropic Java SDK (mocked in tests)
+- [x] Process new tickets in the background with db-scheduler
+- [x] Auto-classify tickets into a category (Haiku)
+- [x] Generate an AI summary for each ticket (Haiku)
+- [x] Generate a suggested reply from the knowledge base (Sonnet)
+- [x] Auto-send personalized replies for FAQ emails the knowledge base answers (never for refunds)
+- [x] Keep tickets open and retry when the AI fails or returns bad output
 
 ## Phase 6: Frontend
 

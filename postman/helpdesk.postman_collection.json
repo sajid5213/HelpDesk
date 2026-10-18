@@ -31,6 +31,14 @@
     {
       "key": "userId",
       "value": ""
+    },
+    {
+      "key": "aiTicketId",
+      "value": ""
+    },
+    {
+      "key": "refundTicketId",
+      "value": ""
     }
   ],
   "item": [
@@ -756,6 +764,248 @@
             },
             "description": "Revokes the user's refresh tokens. Send {\"active\": true} to reactivate."
           }
+        }
+      ]
+    },
+    {
+      "name": "8 AI demo (needs AI turned on)",
+      "description": "Log in as admin first (1 Auth). Turn AI on with ANTHROPIC_API_KEY in backend/.env, or for free local testing on your Claude plan with HELPDESK_AI_MODE=claude-code. The FAQ email is answered automatically; the refund email stays OPEN with a suggested reply. With AI off, both tickets show aiStatus SKIPPED. If aiStatus is still PENDING, send the Get request again after a few seconds.",
+      "item": [
+        {
+          "name": "Add article: video does not load",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/kb/articles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "kb",
+                "articles"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Video does not load\",\n  \"body\": \"If a lesson video stays black or does not play, clear the browser cache and reload the page. If it still fails, try another browser such as Chrome or Firefox.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Add article: refund policy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/kb/articles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "kb",
+                "articles"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Refund policy\",\n  \"body\": \"Students can ask for a full refund within 14 days of purchase if they have completed less than 30% of the course. Refunds are reviewed and approved by the support team.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Email: FAQ (video)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inbound/emails",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inbound",
+                "emails"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromEmail\": \"{{studentEmail}}\",\n  \"fromName\": \"Sam Student\",\n  \"subject\": \"Video in module 3 is black\",\n  \"body\": \"Hi! The video in module 3 just shows a black screen. What should I do?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('aiTicketId', pm.response.json().ticketId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get FAQ ticket (expect auto-resolved)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{aiTicketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "{{aiTicketId}}"
+              ]
+            },
+            "description": "Expect aiStatus DONE, category TECHNICAL_QUESTION, status RESOLVED, autoResolved true, and an OUTBOUND message with sentByAi true."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Give the background AI job time to finish (claude-code mode takes longest).",
+                  "setTimeout(() => {}, 20000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const t = pm.response.json();",
+                  "console.log(`ticket ${t.id}: ai=${t.aiStatus} status=${t.status} category=${t.category} autoResolved=${t.autoResolved}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Email: refund request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inbound/emails",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "inbound",
+                "emails"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromEmail\": \"{{studentEmail}}\",\n  \"fromName\": \"Sam Student\",\n  \"subject\": \"Refund please\",\n  \"body\": \"I bought the Java course last week but it is not for me. Can I get my money back?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('refundTicketId', pm.response.json().ticketId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get refund ticket (expect suggestion only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{refundTicketId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "{{refundTicketId}}"
+              ]
+            },
+            "description": "Expect aiStatus DONE, category REFUND_REQUEST, status OPEN, autoResolved false, and a suggestedReply for the agent. Nothing is sent to the student."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Give the background AI job time to finish (claude-code mode takes longest).",
+                  "setTimeout(() => {}, 20000);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const t = pm.response.json();",
+                  "console.log(`ticket ${t.id}: ai=${t.aiStatus} status=${t.status} category=${t.category} autoResolved=${t.autoResolved}`);"
+                ]
+              }
+            }
+          ]
         }
       ]
     }

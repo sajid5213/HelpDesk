@@ -79,7 +79,9 @@ class JwtValidationTest extends IntegrationTest {
 			.isOk()
 			.expectBody()
 			.jsonPath("$.sub").isEqualTo(agent.getId().toString())
-			.jsonPath("$.authorities[0]").isEqualTo("ROLE_AGENT");
+			// Order is not guaranteed (Spring Security also adds FACTOR_BEARER), so check membership.
+			.jsonPath("$.authorities[?(@ == 'ROLE_AGENT')]").exists()
+			.jsonPath("$.authorities[?(@ == 'ROLE_ADMIN')]").doesNotExist();
 	}
 
 	@Test

@@ -21,6 +21,14 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
 			where t.id = :id and t.assigneeId is null""")
 	int claimIfUnassigned(@Param("id") Long id, @Param("agentId") UUID agentId, @Param("now") Instant now);
 
+	/**
+	 * Records an AI status without bumping the version, so a background job never makes an
+	 * agent's concurrent edit fail. Only for markers (SKIPPED, FAILED), never for AI results.
+	 */
+	@Modifying
+	@Query("update Ticket t set t.aiStatus = :status, t.aiProcessedAt = :now where t.id = :id")
+	int markAiStatus(@Param("id") Long id, @Param("status") AiStatus status, @Param("now") Instant now);
+
 	/** Auto-close: RESOLVED tickets nobody has touched since {@code resolvedBefore}. */
 	@Modifying
 	@Query("""

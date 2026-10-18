@@ -57,6 +57,11 @@ public class TicketMessage {
 		return new TicketMessage(ticketId, MessageDirection.INBOUND, null, body, false, now);
 	}
 
+	/** A reply the AI sent on its own. */
+	public static TicketMessage fromAi(Long ticketId, String body, Instant now) {
+		return new TicketMessage(ticketId, MessageDirection.OUTBOUND, null, body, true, now);
+	}
+
 	static TicketMessage fromAgent(Long ticketId, UUID authorUserId, String body, Instant now) {
 		return new TicketMessage(ticketId, MessageDirection.OUTBOUND, authorUserId, body, false, now);
 	}

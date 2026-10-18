@@ -36,11 +36,19 @@ public abstract class IntegrationTest {
 	@Autowired
 	private LoginRateLimiter rateLimiter;
 
+	@Autowired
+	protected FakeAiClient fakeAi;
+
+	@Autowired
+	protected RecordingEmailSender sentEmails;
+
 	@BeforeEach
 	void resetSharedState() {
 		clock.reset();
 		// Every test request comes from 127.0.0.1, so per-IP limits would leak between tests.
 		rateLimiter.reset();
+		fakeAi.reset();
+		sentEmails.clear();
 	}
 
 	@TestConfiguration(proxyBeanMethods = false)
@@ -50,6 +58,18 @@ public abstract class IntegrationTest {
 		@Primary
 		MutableClock mutableClock() {
 			return new MutableClock();
+		}
+
+		@Bean
+		@Primary
+		FakeAiClient fakeAiClient() {
+			return new FakeAiClient();
+		}
+
+		@Bean
+		@Primary
+		RecordingEmailSender recordingEmailSender() {
+			return new RecordingEmailSender();
 		}
 
 	}

@@ -156,7 +156,7 @@ public class TicketService {
 	}
 
 	/** "[#id]" lets the student's reply find its way back to this ticket. */
-	static String replySubject(Ticket ticket) {
+	public static String replySubject(Ticket ticket) {
 		return "Re: [#" + ticket.getId() + "] " + ticket.getSubject();
 	}
 

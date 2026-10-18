@@ -33,6 +33,7 @@
 | API docs / manual testing | springdoc-openapi + Swagger UI (bearer auth); Postman collection + environment in `postman/` (runnable with Newman) |
 
 **AI usage:**
+- `helpdesk.ai.mode`: `api` (Anthropic Java SDK, the default and production path), `claude-code` (local testing through the Claude Code CLI on a Claude subscription, no API billing), or `off`.
 - Classification and other machine-read results use structured JSON output with a fixed schema.
 - Replies are grounded in knowledge base articles; when they don't cover the question, the ticket goes to an agent.
 - The API key stays in server configuration, never in the frontend.
