@@ -65,10 +65,10 @@ See `project-scope.md` for what we're building and `tech-stack.md` for how.
 
 ## Phase 6: Frontend
 
-- [ ] Keep the access token in memory and silently refresh once on a 401
-- [ ] Build the login page
-- [ ] Build the ticket list page with filters and sorting
-- [ ] Build the ticket detail page with the AI summary, claim button, and reply box
+- [x] Keep the access token in memory and silently refresh once on a 401
+- [x] Build the login page
+- [x] Build the ticket list page with filters and sorting
+- [x] Build the ticket detail page with the AI summary, claim button, and reply box
 
 ## Phase 7: Deployment
 

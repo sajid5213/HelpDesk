@@ -1,0 +1,121 @@
+.login {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* Left: the midnight brand panel, the page's one orchestrated moment. */
+.login-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-7);
+  background: var(--midnight);
+  color: var(--on-midnight);
+}
+
+.login-wordmark {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.login-statement {
+  max-width: 22ch;
+  padding-bottom: var(--space-6);
+}
+
+.login-line {
+  font-family: var(--font-display);
+  font-size: clamp(2.4375rem, 4.6vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  animation: login-fade 700ms ease-out both;
+}
+
+.login-rule {
+  display: block;
+  width: 7.5rem;
+  height: 1px;
+  margin: var(--space-6) 0 var(--space-4);
+  background: var(--champagne);
+  transform-origin: left;
+  animation: login-draw 900ms 250ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.login-sub {
+  color: var(--on-midnight-muted);
+  font-size: var(--text-md);
+  animation: login-fade 700ms 450ms ease-out both;
+}
+
+/* Right: the porcelain sign-in panel. */
+.login-panel {
+  display: grid;
+  place-items: center;
+  padding: var(--space-7) var(--space-5);
+  background: var(--porcelain);
+}
+
+.login-form {
+  display: grid;
+  gap: var(--space-5);
+  width: min(100%, 22rem);
+  animation: login-fade 600ms 300ms ease-out both;
+}
+
+.login-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 500;
+}
+
+.login-hint {
+  margin-top: calc(var(--space-4) * -1);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.login-submit {
+  min-height: 2.75rem;
+  margin-top: var(--space-2);
+}
+
+@keyframes login-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes login-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: 900px) {
+  .login {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .login-brand {
+    padding: var(--space-5);
+    gap: var(--space-6);
+  }
+
+  .login-statement {
+    padding-bottom: 0;
+  }
+
+  .login-line {
+    font-size: var(--text-2xl);
+  }
+
+  .login-rule {
+    margin: var(--space-4) 0 var(--space-3);
+  }
+}

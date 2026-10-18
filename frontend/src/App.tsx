@@ -1,25 +1,49 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
-type Health = 'checking' | 'UP' | 'DOWN' | 'unreachable'
+import { AuthProvider, useAuth } from './auth/AuthContext'
+import { AppShell } from './components/AppShell'
+import { ToastProvider } from './components/Toast'
+import { LoginPage } from './pages/LoginPage'
+import { TicketDetailPage } from './pages/TicketDetailPage'
+import { TicketListPage } from './pages/TicketListPage'
+import { matchPath, RouterProvider, useRouter } from './router'
 
-function App() {
-  const [health, setHealth] = useState<Health>('checking')
+function Screens() {
+  const { state } = useAuth()
+  const { path, navigate } = useRouter()
 
   useEffect(() => {
-    fetch('/actuator/health')
-      .then((res) => res.json())
-      .then((body: { status: string }) => setHealth(body.status === 'UP' ? 'UP' : 'DOWN'))
-      .catch(() => setHealth('unreachable'))
-  }, [])
+    if (state.status === 'signedOut' && path !== '/login') {
+      navigate('/login', { replace: true })
+    }
+    if (state.status === 'signedIn' && (path === '/login' || path === '/')) {
+      navigate('/tickets', { replace: true })
+    }
+  }, [state.status, path, navigate])
 
+  if (state.status === 'checking') {
+    return <div className="app-checking" aria-busy="true" />
+  }
+  if (state.status === 'signedOut') {
+    return <LoginPage />
+  }
+
+  const detail = matchPath('/tickets/:id', path)
   return (
-    <main>
-      <h1>HelpDesk</h1>
-      <p>
-        Backend: <strong data-status={health}>{health}</strong>
-      </p>
-    </main>
+    <AppShell>
+      {detail && /^\d+$/.test(detail.id) ? <TicketDetailPage key={detail.id} id={Number(detail.id)} /> : <TicketListPage />}
+    </AppShell>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <RouterProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <Screens />
+        </ToastProvider>
+      </AuthProvider>
+    </RouterProvider>
+  )
+}

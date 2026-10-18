@@ -2,6 +2,10 @@ package com.helpdesk.ticket;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.helpdesk.common.ApiException;
@@ -41,17 +45,21 @@ public class TicketService {
 
 	private final TicketAccessPolicy access;
 
+	private final StaffDirectory staff;
+
 	private final ApplicationEventPublisher events;
 
 	private final Clock clock;
 
 	TicketService(TicketRepository tickets, TicketMessageRepository messages, TicketNoteRepository notes,
-			UserRepository users, TicketAccessPolicy access, ApplicationEventPublisher events, Clock clock) {
+			UserRepository users, TicketAccessPolicy access, StaffDirectory staff, ApplicationEventPublisher events,
+			Clock clock) {
 		this.tickets = tickets;
 		this.messages = messages;
 		this.notes = notes;
 		this.users = users;
 		this.access = access;
+		this.staff = staff;
 		this.events = events;
 		this.clock = clock;
 	}
@@ -68,13 +76,13 @@ public class TicketService {
 	public TicketSummary claim(Long id, CurrentUser user) {
 		Ticket ticket = find(id);
 		if (ticket.isAssignedTo(user.id())) {
-			return TicketSummary.of(ticket);
+			return summaryOf(ticket);
 		}
 		requireNotClosed(ticket);
 		if (tickets.claimIfUnassigned(id, user.id(), clock.instant()) == 0) {
 			throw new ApiException(HttpStatus.CONFLICT, ALREADY_ASSIGNED, "Another agent already has this ticket");
 		}
-		return TicketSummary.of(find(id));
+		return summaryOf(find(id));
 	}
 
 	/** Answers the student: stores the message, resolves the ticket, emails after commit. */
@@ -133,7 +141,7 @@ public class TicketService {
 		}
 		ticket.assignTo(assigneeId, clock.instant());
 		tickets.saveAndFlush(ticket);
-		return TicketSummary.of(ticket);
+		return summaryOf(ticket);
 	}
 
 	private Ticket find(Long id) {
@@ -141,8 +149,17 @@ public class TicketService {
 	}
 
 	private TicketDetail detailOf(Ticket ticket) {
-		return TicketDetail.of(ticket, messages.findByTicketIdOrderByIdAsc(ticket.getId()),
-				notes.findByTicketIdOrderByIdAsc(ticket.getId()));
+		List<TicketMessage> thread = messages.findByTicketIdOrderByIdAsc(ticket.getId());
+		List<TicketNote> ticketNotes = notes.findByTicketIdOrderByIdAsc(ticket.getId());
+		Set<UUID> people = new HashSet<>();
+		people.add(ticket.getAssigneeId());
+		thread.forEach((m) -> people.add(m.getAuthorUserId()));
+		ticketNotes.forEach((n) -> people.add(n.getAuthorUserId()));
+		return TicketDetail.of(ticket, thread, ticketNotes, staff.emails(people));
+	}
+
+	private TicketSummary summaryOf(Ticket ticket) {
+		return TicketSummary.of(ticket, staff.emails(Collections.singleton(ticket.getAssigneeId())));
 	}
 
 	private static void requireNotClosed(Ticket ticket) {

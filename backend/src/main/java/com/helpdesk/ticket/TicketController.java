@@ -1,6 +1,8 @@
 package com.helpdesk.ticket;
 
 import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
 
 import jakarta.validation.Valid;
 
@@ -40,9 +42,12 @@ class TicketController {
 
 	private final TicketRepository repository;
 
-	TicketController(TicketService tickets, TicketRepository repository) {
+	private final StaffDirectory staff;
+
+	TicketController(TicketService tickets, TicketRepository repository, StaffDirectory staff) {
 		this.tickets = tickets;
 		this.repository = repository;
+		this.staff = staff;
 	}
 
 	@GetMapping
@@ -56,7 +61,9 @@ class TicketController {
 			Authentication auth) {
 		TicketQuery.requireSortable(pageable);
 		TicketQuery query = new TicketQuery(status, category, assignee, q, from, to);
-		return repository.findAll(query.toSpecification(CurrentUser.from(auth)), pageable).map(TicketSummary::of);
+		Page<Ticket> page = repository.findAll(query.toSpecification(CurrentUser.from(auth)), pageable);
+		Map<UUID, String> emails = staff.emails(page.getContent().stream().map(Ticket::getAssigneeId).toList());
+		return page.map((ticket) -> TicketSummary.of(ticket, emails));
 	}
 
 	@GetMapping("/{id}")

@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
@@ -13,8 +14,10 @@ export default defineConfig({
       '/api': backend,
       '/auth': backend,
       '/.well-known': backend,
-      // Dev only: lets the placeholder page show backend health.
-      '/actuator': backend,
     },
+  },
+  test: {
+    environment: 'jsdom',
+    restoreMocks: true,
   },
 })

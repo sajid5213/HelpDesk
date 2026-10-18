@@ -34,6 +34,10 @@ npm install
 npm run dev
 ```
 
+Open http://localhost:5173 and sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`. The web app has three screens: sign in, the ticket queue (open / assigned to me / unassigned, with status, category and search filters), and a ticket page with the thread, AI summary, claim, AI-drafted reply, status changes and internal notes.
+
+How the web app signs in: the access token lives only in memory (never in localStorage or sessionStorage). The refresh token is an HttpOnly, SameSite=Strict cookie scoped to `/auth`, so page scripts can't read it. On a 401 the app refreshes once, shared across parallel requests, and retries; if that fails it returns to sign in. Reloading the page restores the session from the cookie.
+
 ## API tools
 
 - **Swagger UI:** http://localhost:8090/swagger-ui.html. Log in with `POST /auth/token`, click **Authorize**, and paste the `accessToken`.
@@ -50,6 +54,7 @@ ANTHROPIC_API_KEY=sk-... ./mvnw test -Dgroups=live -Dtest.excludedGroups=   # op
 
 ```bash
 cd frontend
+npm run test       # Vitest: token handling and sign-in messages
 npm run lint
 npm run build
 ```

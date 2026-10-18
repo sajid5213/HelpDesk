@@ -1,0 +1,63 @@
+/*
+ * Midnight & gold. A private-bank console: a midnight frame around porcelain work surfaces.
+ * Champagne appears only where it means something: the active view, the subject rule, focus.
+ * Amethyst marks everything the AI wrote.
+ */
+:root {
+  --midnight: #121a30;
+  --midnight-raised: #1c2643;
+  --midnight-line: #2a3557;
+  --on-midnight: #e8eaf2;
+  --on-midnight-muted: #a3aac2;
+
+  --porcelain: #f4f5f8;
+  --surface: #ffffff;
+  --ink: #1a2036;
+  --ink-muted: #5e6680;
+  --hairline: #e2e5ec;
+  --hairline-strong: #cfd4df;
+
+  --champagne: #b8975a;
+  --champagne-soft: #efe6d4;
+
+  --amethyst: #5f4b8b;
+  --amethyst-soft: #f2eff8;
+
+  --open: #a8741a;
+  --open-soft: #fbf3e4;
+  --resolved: #2f7a5f;
+  --resolved-soft: #e8f3ee;
+  --closed: #6b7389;
+  --closed-soft: #eef0f4;
+  --danger: #a23b3b;
+  --danger-soft: #f8eaea;
+
+  --font-display: 'Bodoni Moda', 'Didot', 'Bodoni 72', Georgia, serif;
+  --font-ui: 'Hanken Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* Type scale, ratio 1.25 */
+  --text-xs: 0.8125rem; /* 13 */
+  --text-sm: 0.875rem; /* 14 */
+  --text-md: 1rem; /* 16 */
+  --text-lg: 1.25rem; /* 20 */
+  --text-xl: 1.5625rem; /* 25 */
+  --text-2xl: 1.9375rem; /* 31 */
+  --text-3xl: 2.4375rem; /* 39 */
+
+  --radius-control: 6px;
+  --radius-panel: 10px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --sidebar-width: 248px;
+  --measure: 68ch;
+
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--champagne);
+  --lift: 0 1px 2px rgba(18, 26, 48, 0.06), 0 8px 24px -12px rgba(18, 26, 48, 0.18);
+}

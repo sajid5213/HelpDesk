@@ -1,0 +1,50 @@
+/* Status: a small dot plus a word, so the state never depends on color alone. */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.15em 0.6em 0.15em 0.5em;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status::before {
+  content: '';
+  width: 0.45em;
+  height: 0.45em;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-open {
+  background: var(--open-soft);
+  color: var(--open);
+}
+
+.status-resolved {
+  background: var(--resolved-soft);
+  color: var(--resolved);
+}
+
+.status-closed {
+  background: var(--closed-soft);
+  color: var(--closed);
+}
+
+.category {
+  font-size: var(--text-sm);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.category-refund_request {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.category-none {
+  color: var(--ink-muted);
+  font-style: italic;
+}
