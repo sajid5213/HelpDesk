@@ -74,7 +74,7 @@ See `project-scope.md` for what we're building and `tech-stack.md` for how.
 
 - [x] Build one Docker image where Spring Boot serves the React app (multi-arch build comes with the OCI push)
 - [x] Create a production Docker Compose file for the app and Postgres
-- [ ] Add a GitHub Actions workflow to run tests on every push
+- [x] Add a GitHub Actions workflow to run tests on every push
 - [ ] Add a GitHub Actions workflow to push the image to OCIR and deploy to the OCI VM over SSH
 - [ ] Load secrets from OCI Vault or deploy-time environment variables
 - [ ] Write `docs/oci-setup.md` for the manual OCI steps (compartment, IAM policies, VM, network rules)
