@@ -47,6 +47,11 @@ management:
     web:
       exposure:
         include: health, prometheus
+  health:
+    mail:
+      # The mail server being down doesn't make the app unhealthy: emails wait in the outbox and
+      # are retried. (Also keeps health UP when email is in log mode with no SMTP server.)
+      enabled: false
   tracing:
     # Off unless Tempo is running (compose.observability.yaml), so the app doesn't log failed exports.
     export:
