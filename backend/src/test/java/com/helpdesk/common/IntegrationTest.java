@@ -19,6 +19,7 @@ import org.springframework.boot.test.web.server.LocalManagementPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 /**
@@ -53,6 +54,9 @@ public abstract class IntegrationTest {
 	@LocalManagementPort
 	private int managementPort;
 
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
 	/** Waits up to 15 seconds for something a background job does (send an email, run the AI). */
 	protected static void eventually(BooleanSupplier condition) {
 		Instant deadline = Instant.now().plus(Duration.ofSeconds(15));
@@ -77,6 +81,14 @@ public abstract class IntegrationTest {
 
 	@BeforeEach
 	void resetSharedState() {
+		// Emails and AI runs are background jobs: let the previous test's due jobs finish first, so
+		// they can't deliver into this test's mailbox or change its tickets. (Jobs a moved test
+		// clock put in the far future never run, so they're not waited for.)
+		eventually(() -> jdbcTemplate.queryForObject("""
+				select count(*) from scheduled_tasks
+				where task_name in ('send-email', 'process-ticket')
+				  and execution_time < now() + interval '1 minute'
+				""", Integer.class) == 0);
 		clock.reset();
 		// Every test request comes from 127.0.0.1, so per-IP limits would leak between tests.
 		rateLimiter.reset();
