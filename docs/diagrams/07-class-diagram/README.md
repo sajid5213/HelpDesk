@@ -1,4 +1,6 @@
-# HelpDesk class diagram
+# 7. Class diagram
+
+[← 6. Flowcharts](../06-flowcharts/README.md) · [All diagrams](../README.md)
 
 Every class in `backend/src/main/java` as built (Phases 1–9), plus the web app's modules. GitHub draws the diagrams below.
 

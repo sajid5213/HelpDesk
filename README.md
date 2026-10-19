@@ -5,7 +5,7 @@ AI-assisted support ticket system: customer emails become tickets, Claude sorts 
 - What we're building: [`project-scope.md`](project-scope.md)
 - How: [`tech-stack.md`](tech-stack.md)
 - Progress: [`implementation-plan.md`](implementation-plan.md)
-- Classes: [`docs/class-diagram.md`](docs/class-diagram.md)
+- Diagrams, in reading order: [`docs/diagrams/`](docs/diagrams/README.md)
 
 ## Prerequisites
 
